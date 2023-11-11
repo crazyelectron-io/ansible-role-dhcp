@@ -1,0 +1,56 @@
+# file: /etc/dhcp/dhcpd.conf
+# synopsis: isc-dhcp-server configuration file for primay DHCP server
+
+authoritative;
+default-lease-time    {{ default_lease_time }};
+max-lease-time        18000;
+log-facility          local7;
+
+ddns-domainname "{{ main_domain }}";
+ddns-rev-domainname "in-addr.arpa.";
+ddns-update-style standard;
+ignore client-updates;
+update-static-leases on;
+use-host-decl-names on;
+option domain-name "{{ main_domain }}.";
+option domain-name-servers {{ dns_servers }};
+update-optimization off;
+update-conflict-detection off;
+include "/etc/bind/rndc.key";
+
+### DHCP Failover Configuration - primary ###
+
+failover peer "dhcp-failover" {
+     {{ 'primary' if ansible_hostname == groups['dns_master'][0] else 'secondary' }};
+     address {{ primary_dns if ansible_hostname == groups['dns_master'][0] else secondary_dns }};
+     port {{ dhcp_primary_port if ansible_hostname == groups['dns_master'][0] else dhcp_secondary_port }};
+     peer address {{ secondary_dns if ansible_hostname == groups['dns_master'][0] else primary_dns }};
+     peer port {{ dhcp_secondary_port if ansible_hostname == groups['dns_master'][0] else dhcp_primary_port }};
+     max-response-delay 60;
+     max-unacked-updates 10;
+     {% if ansible_hostname == groups['dns_master'][0] %}
+     mclt {{ dhcp_failover_time }};
+     split 128; #loadbalancing
+     {% endif %}
+     load balance max seconds 5;
+}
+
+### Define the zones ###
+
+zone {{ main_domain }}. {
+    primary 127.0.0.1;
+    key rndc-key;
+}
+
+zone 10.in-addr.arpa. {
+    primary 127.0.0.1;
+    key rndc-key;
+}
+
+### Define the subnets
+
+include "/etc/dhcp/dhcp-subnets.conf";
+
+### Define the reserved addresses
+
+include "/etc/dhcp/dhcp-reserved.conf";

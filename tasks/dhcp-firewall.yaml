@@ -1,0 +1,15 @@
+---
+- name: Allow DHCP client access
+  community.general.ufw:
+    rule: allow
+    port: 67:68
+    proto: udp
+
+- name: Allow DHCP failover peer connection
+  community.general.ufw:
+    rule: allow
+    port: "{{ item }}"
+  loop:
+    - "{{ dhcp_primary_port }}"
+    - "{{ dhcp_secondary_port }}"
+  

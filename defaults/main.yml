@@ -1,0 +1,8 @@
+---
+dhcp_packages:
+  - isc-dhcp-server
+  - dhcping
+
+default_lease_time: 14400
+
+dhcp_failover_time: 600

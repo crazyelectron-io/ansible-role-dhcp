@@ -1,0 +1,15 @@
+---
+- name: Restart isc-dhcp-server
+  ansible.builtin.service:
+    name: isc-dhcp-server
+    state: restarted
+
+- name: Reload isc-dhcp-server
+  ansible.builtin.service:
+    name: isc-dhcp-server
+    state: reloaded
+
+- name: Reboot Linux
+  reboot:
+    reboot_timeout: 300
+  register: reboot

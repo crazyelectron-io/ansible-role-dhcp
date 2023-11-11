@@ -1,0 +1,66 @@
+# file: dhcpd/tasks/main.yaml
+# synopsis: deploy isc-dhcp-server in a container
+---
+- name: Install DHCP packages
+  ansible.builtin.apt:
+    pkg: "{{ dhcp_packages }}"
+    state: present
+    cache_valid_time: 600
+
+- name: Enable only IPv4 on interface
+  ansible.builtin.lineinfile:
+    path: /etc/default/isc-dhcp-server
+    regexp: '^INTERFACESv4'
+    line: 'INTERFACESv4="bond0"'
+    owner: root
+    group: root
+    mode: 0644    
+  notify:
+    - Restart isc-dhcp-server
+  tags:
+    - role:dhcp:ip4
+
+- name: Allow access to BIND9's RNDC key
+  ansible.builtin.template:
+    src: "usr.sbin.dhcpd.j2"
+    dest: "/etc/apparmor.d/local/usr.sbin.dhcpd"
+    owner: root
+    group: root
+    mode: 0644
+  register: dhcp_apparmor
+
+- name: Reload changed Apparmor profiles
+  command: apparmor_parser --replace "/etc/apparmor.d/usr.sbin.dhcpd"
+  when: dhcp_apparmor.changed
+  notify:
+    - Reboot Linux
+  
+- name: Setup DHCP configuration files
+  block:
+    - name: Define DHCP managed subnets
+      ansible.builtin.template:
+        src: "dhcp-subnets.conf.j2"
+        dest: "/etc/dhcp/dhcp-subnets.conf"
+        owner: "root"
+        group: "root"
+        mode: "0644"
+
+    - name: Define reserved IP addresses
+      ansible.builtin.template:
+        src: "dhcp-reserved.conf.j2"
+        dest: "/etc/dhcp/dhcp-reserved.conf"
+        owner: "root"
+        group: "root"
+        mode: "0644"
+
+    - name: Setup DHCP configuration
+      ansible.builtin.template:
+        src: "dhcpd.conf.j2"
+        dest: "/etc/dhcp/dhcpd.conf"
+        owner: "root"
+        group: "root"
+        mode: "0644"
+  notify:
+    - Restart isc-dhcp-server
+
+- include_tasks: dhcp-firewall.yaml
