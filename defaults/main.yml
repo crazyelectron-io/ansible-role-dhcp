@@ -1,8 +1,10 @@
+# file: roles/dhcp/defaults/main.yaml
+# synopsis: default parameter values for isc-dhcp-server install role
 ---
 dhcp_packages:
   - isc-dhcp-server
   - dhcping
-
+# Default IP lease time (in seconds)
 default_lease_time: 14400
-
+# Time in milleseconds before a failover is started
 dhcp_failover_time: 600

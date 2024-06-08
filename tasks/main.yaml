@@ -35,31 +35,13 @@
   notify:
     - Reboot Linux
   
-- name: Setup DHCP configuration files
-  block:
-    - name: Define DHCP managed subnets
-      ansible.builtin.template:
-        src: "dhcp-subnets.conf.j2"
-        dest: "/etc/dhcp/dhcp-subnets.conf"
-        owner: "root"
-        group: "root"
-        mode: "0644"
-
-    - name: Define reserved IP addresses
-      ansible.builtin.template:
-        src: "dhcp-reserved.conf.j2"
-        dest: "/etc/dhcp/dhcp-reserved.conf"
-        owner: "root"
-        group: "root"
-        mode: "0644"
-
-    - name: Setup DHCP configuration
-      ansible.builtin.template:
-        src: "dhcpd.conf.j2"
-        dest: "/etc/dhcp/dhcpd.conf"
-        owner: "root"
-        group: "root"
-        mode: "0644"
+- name: Setup DHCP configuration
+  ansible.builtin.template:
+    src: "dhcpd.conf.j2"
+    dest: "/etc/dhcp/dhcpd.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
   notify:
     - Restart isc-dhcp-server
 
