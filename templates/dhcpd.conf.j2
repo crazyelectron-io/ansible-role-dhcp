@@ -2,24 +2,26 @@
 # synopsis: isc-dhcp-server configuration file for primay DHCP server
 
 authoritative;
-default-lease-time    {{ default_lease_time }};
+default-lease-time    {{default_lease_time}};
 max-lease-time        18000;
 log-facility          local7;
 
-ddns-domainname "{{ main_domain }}";
+ddns-domainname "{{search_domain}}";
 ddns-rev-domainname "in-addr.arpa.";
 ddns-update-style standard;
 ignore client-updates;
 update-static-leases on;
 use-host-decl-names on;
-option domain-name "{{ main_domain }}.";
-option domain-name-servers {{ dns_servers }};
+option domain-name "{{search_domain }}.";
+option domain-name-servers {{primary_dns}}{% if secondary_dns is defined %},{{secondary_dns}}{% endif %};
 update-optimization off;
 update-conflict-detection off;
 include "/etc/bind/rndc.key";
 
-### DHCP Failover Configuration - primary ###
+### Netboot option to specify architecture ###
+option arch code 93 = unsigned integer 16;
 
+### DHCP Failover Configuration - primary ###
 failover peer "dhcp-failover" {
      {{ 'primary' if ansible_hostname == groups['dns_master'][0] else 'secondary' }};
      address {{ primary_dns if ansible_hostname == groups['dns_master'][0] else secondary_dns }};
@@ -36,8 +38,7 @@ failover peer "dhcp-failover" {
 }
 
 ### Define the zones ###
-
-zone {{ main_domain }}. {
+zone {{search_domain}}. {
     primary 127.0.0.1;
     key rndc-key;
 }
@@ -48,9 +49,7 @@ zone 10.in-addr.arpa. {
 }
 
 ### Define the subnets
-
 include "/etc/dhcp/dhcp-subnets.conf";
 
 ### Define the reserved addresses
-
 include "/etc/dhcp/dhcp-reserved.conf";

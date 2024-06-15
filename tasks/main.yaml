@@ -1,11 +1,15 @@
 # file: dhcpd/tasks/main.yaml
 # synopsis: deploy isc-dhcp-server in a container
 ---
+- include_tasks: dhcp-firewall.yaml
+  when: inventory_hostname in groups.dns_servers
+
 - name: Install DHCP packages
   ansible.builtin.apt:
     pkg: "{{ dhcp_packages }}"
     state: present
     cache_valid_time: 600
+  when: inventory_hostname in groups.dns_servers
 
 - name: Enable only IPv4 on interface
   ansible.builtin.lineinfile:
@@ -19,6 +23,7 @@
     - Restart isc-dhcp-server
   tags:
     - role:dhcp:ip4
+  when: inventory_hostname in groups.dns_servers
 
 - name: Allow access to BIND9's RNDC key
   ansible.builtin.template:
@@ -28,10 +33,13 @@
     group: root
     mode: 0644
   register: dhcp_apparmor
+  when: inventory_hostname in groups.dns_servers
 
 - name: Reload changed Apparmor profiles
   command: apparmor_parser --replace "/etc/apparmor.d/usr.sbin.dhcpd"
-  when: dhcp_apparmor.changed
+  when:
+    - inventory_hostname in groups.dns_servers
+    - dhcp_apparmor.changed
   notify:
     - Reboot Linux
   
@@ -44,5 +52,4 @@
     mode: "0644"
   notify:
     - Restart isc-dhcp-server
-
-- include_tasks: dhcp-firewall.yaml
+  when: inventory_hostname in groups.dns_servers
