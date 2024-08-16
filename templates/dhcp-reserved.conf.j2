@@ -4,7 +4,7 @@
 #### Hostname override for invalid hostnames ####
 
 {% for entry in dhcp_hostname_overrides %}
-host {% entry.host %} {
+host {{entry.host}} {
   hardware ethernet {{entry.mac}};
   option host-name "{{entry.name}}";
 }
