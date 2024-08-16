@@ -8,6 +8,7 @@ host {{entry.host}} {
   hardware ethernet {{entry.mac}};
   option host-name "{{entry.name}}";
 }
+
 {% endfor %}
 
 #### Reserved addresses ####
@@ -17,4 +18,5 @@ host {{entry.host}} {
   hardware ethernet {{entry.mac}};
   fixed-address {{entry.address}};
 }
+
 {% endfor %}
