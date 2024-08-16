@@ -1,7 +1,7 @@
 ---
 - name: Setup DHCP subnet configuration
   ansible.builtin.template:
-    src: "dhcpd-subnets.conf.j2"
+    src: dhcp-subnets.conf.j2
     dest: "/etc/dhcp/dhcp-subnets.conf"
     owner: "root"
     group: "root"
@@ -11,7 +11,7 @@
 
 - name: Setup DHCP IP address reservations
   ansible.builtin.template:
-    src: "dhcpd-reserved.conf.j2"
+    src: "dhcp-reserved.conf.j2"
     dest: "/etc/dhcp/dhcp-reserved.conf"
     owner: "root"
     group: "root"
