@@ -8,3 +8,5 @@ dhcp_packages:
 default_lease_time: 14400
 # Time in milleseconds before a failover is started
 dhcp_failover_time: 600
+# DHCP network interface
+dhcp_interface: eth0

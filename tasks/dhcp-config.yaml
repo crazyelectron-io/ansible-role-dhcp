@@ -1,0 +1,30 @@
+---
+- name: Setup DHCP subnet configuration
+  ansible.builtin.template:
+    src: "dhcpd-subnets.conf.j2"
+    dest: "/etc/dhcp/dhcp-subnets.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  notify:
+    - Restart isc-dhcp-server
+
+- name: Setup DHCP IP address reservations
+  ansible.builtin.template:
+    src: "dhcpd-reserved.conf.j2"
+    dest: "/etc/dhcp/dhcp-reserved.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  notify:
+    - Restart isc-dhcp-server
+
+- name: Setup DHCP configuration
+  ansible.builtin.template:
+    src: "dhcpd.conf.j2"
+    dest: "/etc/dhcp/dhcpd.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  notify:
+    - Restart isc-dhcp-server

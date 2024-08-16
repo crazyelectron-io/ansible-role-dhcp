@@ -6,7 +6,7 @@
 
 - name: Install DHCP packages
   ansible.builtin.apt:
-    pkg: "{{ dhcp_packages }}"
+    pkg: "{{dhcp_packages}}"
     state: present
     cache_valid_time: 600
   when: inventory_hostname in groups.dns_servers
@@ -15,10 +15,10 @@
   ansible.builtin.lineinfile:
     path: /etc/default/isc-dhcp-server
     regexp: '^INTERFACESv4'
-    line: 'INTERFACESv4="bond0"'
+    line: 'INTERFACESv4="{{dhcp_interface}}"'
     owner: root
     group: root
-    mode: 0644    
+    mode: 0644
   notify:
     - Restart isc-dhcp-server
   tags:
@@ -42,14 +42,6 @@
     - dhcp_apparmor.changed
   notify:
     - Reboot Linux
-  
-- name: Setup DHCP configuration
-  ansible.builtin.template:
-    src: "dhcpd.conf.j2"
-    dest: "/etc/dhcp/dhcpd.conf"
-    owner: "root"
-    group: "root"
-    mode: "0644"
-  notify:
-    - Restart isc-dhcp-server
+
+- include_tasks: dhcp-config.yaml
   when: inventory_hostname in groups.dns_servers

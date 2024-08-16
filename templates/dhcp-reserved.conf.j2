@@ -1,103 +1,20 @@
-# file: /etc/dhcpd/dhcp-reserved.conf.j2
-# synopsis: defines the reserved IP addresses for all supported VLANs
+# file: ./roles/dhcp/templates/dhcp-reserved.conf.j2
+# synopsis: defines the reserved IP addresses for all VLANs
 
 #### Hostname override for invalid hostnames ####
 
-# --- ESP devices with underscore in hostname
-host ESP50B991 {
-    hardware ethernet d8:bf:c0:50:b9:91;
-    option host-name "ESP-50B991";
+{% for entry in dhcp_hostname_overrides %}
+host {% entry.host %} {
+  hardware ethernet {{entry.mac}};
+  option host-name "{{entry.name}}";
 }
+{% endfor %}
 
-#### Reserved addresses for IoT VLAN ####
+#### Reserved addresses ####
 
-# --- Hue bridges
-host hue-fusebox {
-  hardware ethernet 00:17:88:2e:c5:b3;
-  fixed-address 10.20.2.246;
+{% for entry in dhcp_reseervations %}
+host {{entry.host}} {
+  hardware ethernet {{entry.mac}};
+  fixed-address {{entry.address}};
 }
-host hue-attic {
-  hardware ethernet 00:17:88:6d:22:93;
-  fixed-address 10.20.2.247;
-}
-# --- Airco units
-host airco-bedroom {
-  hardware ethernet f0:03:8c:d5:7e:da;
-  fixed-address 10.20.2.201;
-}
-host airco-laundry {
-  hardware ethernet f0:03:8c:d5:c1:06;
-  fixed-address 10.20.2.202;
-}
-host airco-menno {
-  hardware ethernet f0:03:8c:d5:c0:99;
-  fixed-address 10.20.2.203;
-}
-host airco-office {
-  hardware ethernet f0:03:8c:d5:7f:26;
-  fixed-address 10.20.2.204;
-}
-host airco-living {
-  hardware ethernet e8:c7:cf:53:80:52;
-  fixed-address 10.20.2.205;
-}
-# --- Shelly switches
-host plug-dryer {
-  hardware ethernet d8:f1:5b:16:01:b4;
-  fixed-address 10.20.2.211;
-}
-host plug-floorpump {
-  hardware ethernet e0:98:06:9d:9a:b3;
-  fixed-address 10.20.2.212;
-}
-host shutter-garage {
-  hardware ethernet 68:c6:3a:f9:c3:ec;
-  fixed-address 10.20.2.213;
-}
-# --- SolarEdge monitoring Pi
-host solar-pi {
-    hardware ethernet b8:27:eb:4f:a7:25;
-    fixed-address 10.20.0.19;
-}
-
-###### Reserved addressed for Home VLAN
-
-# --- Color laser printer
-host hp-printer {
-  hardware ethernet 04:0e:3c:e9:ba:1f;
-  fixed-address 10.10.2.250;
-}
-
-###### Reserved addresses for Cloud VLAN
-
-# --- SolarEdge inverter
-host SE7000 {
-  hardware ethernet 00:27:02:14:57:30;
-  fixed-address 10.30.0.20;
-}
-
-###### Reserved addressed for Server VLAN
-
-# --- Kubernetes production cluster worker nodes
-host k3sprodw01 {
-  hardware ethernet 02:be:10:64:03:11;
-  fixed-address 10.100.0.11;
-}
-host k3sprodw02 {
-  hardware ethernet 02:be:10:64:03:12;
-  fixed-address 10.100.0.12;
-}
-host k3sprodw03 {
-  hardware ethernet 02:be:10:64:03:13;
-  fixed-address 10.100.0.13;
-}
-# --- Plex media server VM
-host plexvm {
-  hardware ethernet 02:be:10:64:05:10;
-  fixed-address 10.100.3.100;
-}
-# --- Rancher VM
-host ranchervm {
-  hardware ethernet 02:be:10:64:05:19;
-  fixed-address 10.100.0.19;
-}
+{% endfor %}
