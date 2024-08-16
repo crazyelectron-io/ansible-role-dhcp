@@ -12,7 +12,7 @@ host {{entry.host}} {
 
 #### Reserved addresses ####
 
-{% for entry in dhcp_reseervations %}
+{% for entry in dhcp_reservations %}
 host {{entry.host}} {
   hardware ethernet {{entry.mac}};
   fixed-address {{entry.address}};
